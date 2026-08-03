@@ -1,0 +1,7 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"; import type { Employee, EmployeeFilters } from "@/types"; import { employeesService } from "@/services/employees.service";
+export const employeeKeys = { all: ["employees"] as const, list: (filters: EmployeeFilters) => [...employeeKeys.all, filters] as const, detail: (id: string) => [...employeeKeys.all, id] as const };
+export function useEmployees(filters: EmployeeFilters = {}) { return useQuery({ queryKey: employeeKeys.list(filters), queryFn: () => employeesService.getEmployees(filters) }); }
+export function useEmployee(id?: string) { return useQuery({ queryKey: employeeKeys.detail(id ?? ""), queryFn: () => employeesService.getEmployee(id!), enabled: Boolean(id) }); }
+export function useCreateEmployee() { const client = useQueryClient(); return useMutation({ mutationFn: (data: Partial<Employee>) => employeesService.createEmployee(data), onSuccess: () => client.invalidateQueries({ queryKey: employeeKeys.all }) }); }
+export function useUpdateEmployee() { const client = useQueryClient(); return useMutation({ mutationFn: ({ id, data }: { id: string; data: Partial<Employee> }) => employeesService.updateEmployee(id, data), onSuccess: () => client.invalidateQueries({ queryKey: employeeKeys.all }) }); }
+export function useDeleteEmployee() { const client = useQueryClient(); return useMutation({ mutationFn: employeesService.deleteEmployee, onSuccess: () => client.invalidateQueries({ queryKey: employeeKeys.all }) }); }

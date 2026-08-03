@@ -1,0 +1,10 @@
+import { supabase } from "@/lib/supabase";
+import type { Employee, EmployeeFilters, PaginatedResponse } from "@/types";
+const fail = (error: Error | null) => { if (error) throw error; };
+export const employeesService = {
+  async getEmployees(filters: EmployeeFilters = {}): Promise<PaginatedResponse<Employee>> { const page = filters.page ?? 1, limit = filters.limit ?? 20; let query = supabase.from("employees").select("*, departments(name), designations(title)", { count: "exact" }).range((page - 1) * limit, page * limit - 1).order(filters.sort_by ?? "created_at", { ascending: filters.sort_order !== "desc" }); if (filters.search) query = query.or(`first_name.ilike.%${filters.search}%,last_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`); if (filters.department_id) query = query.eq("department_id", filters.department_id); if (filters.status) query = query.eq("status", filters.status); const { data, error, count } = await query; fail(error); const rows = (data ?? []).map((x: any) => ({ ...x, department_name: x.departments?.name, designation_title: x.designations?.title })); return { data: rows, total: count ?? 0, page, limit, total_pages: Math.ceil((count ?? 0) / limit) }; },
+  async getEmployee(id: string): Promise<Employee> { const { data, error } = await supabase.from("employees").select("*, departments(name), designations(title)").eq("id", id).single(); fail(error); return { ...data, department_name: data.departments?.name, designation_title: data.designations?.title }; },
+  async createEmployee(data: Partial<Employee>) { const { data: row, error } = await supabase.from("employees").insert(data).select().single(); fail(error); return row as Employee; },
+  async updateEmployee(id: string, data: Partial<Employee>) { const { data: row, error } = await supabase.from("employees").update(data).eq("id", id).select().single(); fail(error); return row as Employee; },
+  async deleteEmployee(id: string) { const { error } = await supabase.from("employees").update({ status: "terminated" }).eq("id", id); fail(error); },
+};
