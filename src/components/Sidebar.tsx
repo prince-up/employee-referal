@@ -30,13 +30,13 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-  { label: "Employees", icon: Users, path: "/employees" },
-  { label: "Departments", icon: Building2, path: "/departments" },
-  { label: "Attendance", icon: CalendarDays, path: "/attendance" },
+  { label: "Employees", icon: Users, path: "/employees", roles: ["admin", "hr"] },
+  { label: "Departments", icon: Building2, path: "/departments", roles: ["admin", "hr"] },
+  { label: "Attendance", icon: CalendarDays, path: "/attendance", roles: ["admin", "hr", "employee"] },
   { label: "Leave", icon: ClipboardList, path: "/leave" },
-  { label: "Payroll", icon: DollarSign, path: "/payroll" },
+  { label: "Payroll", icon: DollarSign, path: "/payroll", roles: ["admin", "hr"] },
   { label: "Payslips", icon: FileText, path: "/payslips" },
-  { label: "Reports", icon: BarChart3, path: "/reports" },
+  { label: "Reports", icon: BarChart3, path: "/reports", roles: ["admin", "hr"] },
   { label: "Admin", icon: Shield, path: "/admin", roles: ["admin"] },
   { label: "Settings", icon: Settings, path: "/settings" },
 ];
@@ -44,8 +44,6 @@ const navItems: NavItem[] = [
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { user, logout } = useAuth();
-  const location = useLocation();
-
   const visibleItems = navItems.filter(
     (item) => !item.roles || item.roles.includes(user?.role ?? "")
   );

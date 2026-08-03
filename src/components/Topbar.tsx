@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
-import { mockNotifications } from "@/utils/mockData";
+import { useMarkNotificationRead, useNotifications } from "@/hooks/useNotifications";
 import { timeAgo } from "@/utils";
 import {
   Bell,
@@ -43,14 +43,9 @@ export default function Topbar() {
       location.pathname.startsWith(path)
     )?.[1] ?? "HRMS";
 
-  const unreadCount = mockNotifications.filter((n) => !n.read).length;
-
-  const notifColors = {
-    success: "text-emerald-500",
-    error: "text-red-500",
-    warning: "text-amber-500",
-    info: "text-blue-500",
-  };
+  const { data: notifications = [] } = useNotifications();
+  const markRead = useMarkNotificationRead();
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md flex items-center px-6 gap-4 sticky top-0 z-10 shrink-0">
@@ -123,10 +118,11 @@ export default function Topbar() {
                 </div>
               </div>
               <div className="divide-y divide-border max-h-80 overflow-y-auto scrollbar-thin">
-                {mockNotifications.map((n) => (
+                {notifications.length === 0 && <p className="p-6 text-center text-sm text-muted-foreground">You’re all caught up.</p>}
+                {notifications.map((n) => (
                   <div
                     key={n.id}
-                    className={cn(
+                    onClick={() => !n.read && markRead.mutate(n.id)} className={cn(
                       "p-4 hover:bg-muted/50 transition-colors cursor-pointer",
                       !n.read && "bg-primary/5"
                     )}
