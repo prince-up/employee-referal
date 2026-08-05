@@ -19,9 +19,9 @@ async function toAppUser(session: Session): Promise<User> {
     avatar: typeof metadata.avatar_url === "string" ? metadata.avatar_url : undefined,
     role: "employee",
   };
-  const { data, error } = await supabase.from("profiles").select("email, full_name, role, avatar_url, employee_id").eq("id", session.user.id).maybeSingle();
+  const { data, error } = await supabase.from("profiles").select("email, full_name, role, avatar_url, employee_id, organization_id").eq("id", session.user.id).maybeSingle();
   if (error || !data) return fallback;
-  return { id: session.user.id, email: data.email || fallback.email, name: data.full_name || fallback.name, role: data.role, avatar: data.avatar_url ?? undefined, employee_id: data.employee_id ?? undefined };
+  return { id: session.user.id, email: data.email || fallback.email, name: data.full_name || fallback.name, role: data.role, avatar: data.avatar_url ?? undefined, employee_id: data.employee_id ?? undefined, organization_id: data.organization_id ?? undefined };
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

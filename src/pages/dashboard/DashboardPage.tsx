@@ -2,14 +2,142 @@ import { useNavigate } from "react-router-dom";
 import { BarChart, Bar, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Building2, CalendarCheck, ClipboardList, DollarSign, Plus, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, EmptyState, StatCard } from "@/components/ui";
+import AttendanceWidget from "@/components/AttendanceWidget";
 import { formatCurrency, timeAgo } from "@/utils";
 import { useAuth } from "@/context/AuthContext";
 import { useDashboard } from "@/hooks/useDashboard";
+import OnboardingWidget from "@/components/OnboardingWidget";
 
 export default function DashboardPage() {
   const navigate = useNavigate(); const { user } = useAuth(); const { data, isLoading, isError, refetch } = useDashboard();
+  if (!user?.organization_id) {
+    return <OnboardingWidget />;
+  }
   if (isError) return <EmptyState icon={ClipboardList} title="We couldn't load your workspace" description="Check your Supabase schema and permissions, then try again." action={<button onClick={() => refetch()} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">Try again</button>} />;
   const stats = data?.stats ?? { total_employees: 0, active_employees: 0, total_departments: 0, monthly_payroll: 0, total_salary_expense: 0, today_present: 0, today_absent: 0, pending_leaves: 0 };
   const actions = user?.role === "employee" ? [{ label: "Request leave", path: "/leave" }, { label: "My payslips", path: "/payslips" }] : [{ label: "Add employee", path: "/employees/new" }, { label: "Mark attendance", path: "/attendance" }, { label: "Review leave", path: "/leave" }, { label: "Run payroll", path: "/payroll" }];
-  return <div className="space-y-6 animate-fade-in"><div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-sm font-medium text-primary capitalize">{user?.role} workspace</p><h2 className="text-3xl font-bold tracking-tight">Welcome back, {user?.name?.split(" ")[0] ?? "there"}</h2><p className="mt-1 text-sm text-muted-foreground">Live operational data from your organization.</p></div>{user?.role !== "employee" && <button onClick={() => navigate("/employees/new")} className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm"><Plus className="h-4 w-4" /> Add employee</button>}</div><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard title="Team members" value={isLoading ? "—" : stats.total_employees} subtitle={`${stats.active_employees} active`} icon={Users} color="primary" /><StatCard title="This month's payroll" value={formatCurrency(stats.monthly_payroll)} subtitle="Processed payslips" icon={DollarSign} color="success" /><StatCard title="Today's attendance" value={`${stats.today_present}/${stats.total_employees}`} subtitle={`${stats.today_absent} absent`} icon={CalendarCheck} color="info" /><StatCard title="Pending requests" value={stats.pending_leaves} subtitle="Awaiting action" icon={ClipboardList} color="warning" /></div><div className="grid gap-4 xl:grid-cols-5"><Card className="xl:col-span-3"><CardHeader><CardTitle>Today’s attendance</CardTitle><p className="text-sm text-muted-foreground">Updates from live clock-in records.</p></CardHeader><CardContent>{data?.attendance.length ? <ResponsiveContainer width="100%" height={250}><BarChart data={data.attendance}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="day" /><YAxis allowDecimals={false} /><Tooltip /><Bar dataKey="present" fill="#10b981" radius={[5,5,0,0]} /><Bar dataKey="absent" fill="#f43f5e" radius={[5,5,0,0]} /><Bar dataKey="leave" fill="#f59e0b" radius={[5,5,0,0]} /></BarChart></ResponsiveContainer> : <EmptyState icon={CalendarCheck} title="No attendance yet" description="Mark attendance to see today's team status." />}</CardContent></Card><Card className="xl:col-span-2"><CardHeader><CardTitle>Department headcount</CardTitle></CardHeader><CardContent>{data?.departments.some((d) => d.value > 0) ? <><ResponsiveContainer width="100%" height={180}><PieChart><Pie data={data.departments} dataKey="value" innerRadius={45} outerRadius={72}>{data.departments.map((d) => <Cell key={d.name} fill={d.color} />)}</Pie><Tooltip /></PieChart></ResponsiveContainer><div className="space-y-2">{data.departments.map((d) => <div key={d.name} className="flex justify-between text-sm"><span className="text-muted-foreground">{d.name}</span><span className="font-semibold">{d.value}</span></div>)}</div></> : <EmptyState icon={Building2} title="No departments yet" description="Create departments to organize your team." />}</CardContent></Card></div><div className="grid gap-4 xl:grid-cols-2"><Card><CardHeader><CardTitle>Recent activity</CardTitle></CardHeader><CardContent>{data?.activities.length ? <div className="space-y-4">{data.activities.map((activity) => <div key={activity.id} className="border-l-2 border-primary pl-3"><p className="text-sm font-medium capitalize">{activity.message}</p><p className="text-xs text-muted-foreground">{timeAgo(activity.timestamp)}</p></div>)}</div> : <EmptyState icon={ClipboardList} title="Nothing to show yet" description="Activity will appear as your team works." />}</CardContent></Card><Card><CardHeader><CardTitle>Quick actions</CardTitle></CardHeader><CardContent className="grid grid-cols-2 gap-3">{actions.map((action) => <button key={action.path} onClick={() => navigate(action.path)} className="rounded-xl border bg-muted/30 p-4 text-left text-sm font-semibold transition hover:border-primary hover:bg-primary/5">{action.label}</button>)}</CardContent></Card></div></div>;
+  
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-medium text-primary capitalize">{user?.role} workspace</p>
+          <h2 className="text-3xl font-bold tracking-tight">Welcome back, {user?.name?.split(" ")[0] ?? "there"}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Live operational data from your organization.</p>
+        </div>
+        {user?.role !== "employee" && (
+          <button onClick={() => navigate("/employees/new")} className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm">
+            <Plus className="h-4 w-4" /> Add employee
+          </button>
+        )}
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-3">
+        {/* Left main area */}
+        <div className="xl:col-span-2 space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <StatCard title="Team members" value={isLoading ? "—" : stats.total_employees} subtitle={`${stats.active_employees} active`} icon={Users} color="primary" />
+            <StatCard title="Today's attendance" value={`${stats.today_present}/${stats.total_employees}`} subtitle={`${stats.today_absent} absent`} icon={CalendarCheck} color="info" />
+            <StatCard title="This month's payroll" value={formatCurrency(stats.monthly_payroll)} subtitle="Processed payslips" icon={DollarSign} color="success" />
+            <StatCard title="Pending requests" value={stats.pending_leaves} subtitle="Awaiting action" icon={ClipboardList} color="warning" />
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Today’s attendance</CardTitle>
+              <p className="text-sm text-muted-foreground">Updates from live clock-in records.</p>
+            </CardHeader>
+            <CardContent>
+              {data?.attendance.length ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={data.attendance}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="day" />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Bar dataKey="present" fill="#10b981" radius={[5,5,0,0]} />
+                    <Bar dataKey="absent" fill="#f43f5e" radius={[5,5,0,0]} />
+                    <Bar dataKey="leave" fill="#f59e0b" radius={[5,5,0,0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyState icon={CalendarCheck} title="No attendance yet" description="Mark attendance to see today's team status." />
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {data?.activities.length ? (
+                <div className="space-y-4">
+                  {data.activities.map((activity) => (
+                    <div key={activity.id} className="border-l-2 border-primary pl-3">
+                      <p className="text-sm font-medium capitalize">{activity.message}</p>
+                      <p className="text-xs text-muted-foreground">{timeAgo(activity.timestamp)}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState icon={ClipboardList} title="Nothing to show yet" description="Activity will appear as your team works." />
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right sidebar area */}
+        <div className="xl:col-span-1 space-y-6">
+          <AttendanceWidget />
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick actions</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-3">
+              {actions.map((action) => (
+                <button key={action.path} onClick={() => navigate(action.path)} className="rounded-xl border bg-muted/30 p-4 text-left text-sm font-semibold transition hover:border-primary hover:bg-primary/5">
+                  {action.label}
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+
+          {user?.role !== "employee" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Department headcount</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {data?.departments.some((d) => d.value > 0) ? (
+                  <>
+                    <ResponsiveContainer width="100%" height={180}>
+                      <PieChart>
+                        <Pie data={data.departments} dataKey="value" innerRadius={45} outerRadius={72}>
+                          {data.departments.map((d) => <Cell key={d.name} fill={d.color} />)}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="space-y-2">
+                      {data.departments.map((d) => (
+                        <div key={d.name} className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">{d.name}</span>
+                          <span className="font-semibold">{d.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <EmptyState icon={Building2} title="No departments yet" description="Create departments to organize your team." />
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
+

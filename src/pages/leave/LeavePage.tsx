@@ -2,17 +2,9 @@ import { useState } from "react";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
   Button,
   Badge,
   Avatar,
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
   Dialog,
   Label,
   Input,
@@ -27,7 +19,7 @@ import {
   mockLeaveBalances,
   mockEmployees,
 } from "@/utils/mockData";
-import { formatDate, formatCurrency } from "@/utils";
+import { formatDate } from "@/utils";
 import { useAuth } from "@/context/AuthContext";
 import {
   ClipboardList,

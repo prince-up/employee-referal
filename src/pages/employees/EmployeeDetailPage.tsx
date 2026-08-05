@@ -8,7 +8,12 @@ import {
   Badge,
   Button,
   Avatar,
-  Separator,
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableBody,
 } from "@/components/ui";
 import {
   mockEmployees,

@@ -17,7 +17,7 @@ import {
   toast,
 } from "@/components/ui";
 import { mockAuditLogs, mockNotifications } from "@/utils/mockData";
-import { formatDateTime, timeAgo } from "@/utils";
+import { timeAgo } from "@/utils";
 import { Shield, Users, Key, ClipboardList, Database, RefreshCw, Download, Bell } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 

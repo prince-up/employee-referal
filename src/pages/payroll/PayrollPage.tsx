@@ -15,17 +15,15 @@ import {
   TableCell,
   Select,
   Dialog,
-  Label,
   StatCard,
   EmptyState,
   toast,
 } from "@/components/ui";
 import { mockPayroll, mockEmployees, mockDepartments } from "@/utils/mockData";
-import { formatCurrency, formatDate, calculatePayroll, getMonthName } from "@/utils";
+import { formatCurrency, calculatePayroll, getMonthName } from "@/utils";
 import {
   DollarSign,
   Play,
-  FileText,
   Download,
   Eye,
   CheckCircle,

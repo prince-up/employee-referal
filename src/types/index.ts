@@ -11,6 +11,7 @@ export interface User {
   name: string;
   avatar?: string;
   employee_id?: string;
+  organization_id?: string;
 }
 
 export interface AuthState {

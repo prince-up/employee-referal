@@ -16,7 +16,7 @@ import {
   toast,
 } from "@/components/ui";
 import { mockEmployees, mockPayroll, mockDepartments, departmentData, monthlyPayrollData } from "@/utils/mockData";
-import { formatCurrency, formatDate, getMonthName } from "@/utils";
+import { formatCurrency, formatDate } from "@/utils";
 import {
   BarChart,
   Bar,
@@ -30,23 +30,18 @@ import {
   Cell,
   LineChart,
   Line,
-  Legend,
 } from "recharts";
 import {
-  FileText,
   Download,
   Users,
   DollarSign,
   Building2,
-  TrendingUp,
   FileSpreadsheet,
-  FilePdf,
 } from "lucide-react";
 
 export default function ReportsPage() {
   const [activeReport, setActiveReport] = useState<"payroll" | "employee" | "department" | "attendance">("payroll");
 
-  const totalPayroll = mockPayroll.reduce((s, p) => s + p.salary.net_salary, 0);
   const totalEmployees = mockEmployees.length;
   const activeEmps = mockEmployees.filter((e) => e.status === "active").length;
 
@@ -114,7 +109,7 @@ export default function ReportsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                     <YAxis tickFormatter={(v) => `₹${(v / 100000).toFixed(0)}L`} tick={{ fontSize: 11 }} />
-                    <Tooltip formatter={(v: number) => [formatCurrency(v), "Payroll"]} contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
+                    <Tooltip formatter={(v: any) => [formatCurrency(v), "Payroll"]} contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
                     <Bar dataKey="expense" fill="#6366f1" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -192,7 +187,7 @@ export default function ReportsPage() {
               <CardContent>
                 <ResponsiveContainer width="100%" height={260}>
                   <PieChart>
-                    <Pie data={departmentData} cx="50%" cy="50%" outerRadius={90} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                    <Pie data={departmentData} cx="50%" cy="50%" outerRadius={90} paddingAngle={3} dataKey="value" label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
                       {departmentData.map((e, i) => <Cell key={i} fill={e.color} />)}
                     </Pie>
                     <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />

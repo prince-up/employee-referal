@@ -12,11 +12,10 @@ import {
   Input,
   Select,
   Label,
-  Textarea,
   toast,
 } from "@/components/ui";
 import { mockEmployees, mockDepartments, mockDesignations } from "@/utils/mockData";
-import { ArrowLeft, Save, User } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 
 const schema = z.object({
   first_name: z.string().min(2, "First name is required"),
@@ -110,13 +109,7 @@ export default function EmployeeFormPage() {
     navigate("/employees");
   };
 
-  const sections = [
-    { title: "Personal Information", icon: "👤" },
-    { title: "Employment Details", icon: "💼" },
-    { title: "Address", icon: "📍" },
-    { title: "Bank & Compliance", icon: "🏦" },
-    { title: "Salary", icon: "💰" },
-  ];
+
 
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl">

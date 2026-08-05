@@ -187,7 +187,7 @@ export default function EmployeesPage() {
         <CardHeader className="pb-0">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">
-              {filtered.length} {filtered.length === 1 ? "Employee" : "Employees"} Found
+              {result?.total ?? 0} {(result?.total ?? 0) === 1 ? "Employee" : "Employees"} Found
             </CardTitle>
             <p className="text-sm text-muted-foreground">
               Page {page} of {totalPages || 1}
@@ -301,7 +301,7 @@ export default function EmployeesPage() {
         {totalPages > 1 && (
           <div className="flex justify-between items-center p-4 border-t border-border">
             <p className="text-sm text-muted-foreground">
-              Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length}
+              Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, result?.total ?? 0)} of {result?.total ?? 0}
             </p>
             <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </div>

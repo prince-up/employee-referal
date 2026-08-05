@@ -2,23 +2,15 @@ import { useState } from "react";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
   Button,
   Badge,
   Avatar,
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
   Select,
   Dialog,
   toast,
 } from "@/components/ui";
 import { mockPayroll, mockEmployees } from "@/utils/mockData";
-import { formatCurrency, formatDate, getMonthName } from "@/utils";
+import { formatCurrency, getMonthName } from "@/utils";
 import { FileText, Download, Mail, Eye, Search } from "lucide-react";
 import type { Payroll } from "@/types";
 
