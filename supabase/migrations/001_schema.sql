@@ -65,7 +65,6 @@ declare
   desig_sl_id uuid;
   user_email text;
   user_name text;
-  emp_record record;
 begin
   -- Get active user email and name from profiles or auth
   select email, full_name into user_email, user_name from public.profiles where id = auth.uid();
@@ -158,20 +157,11 @@ begin
   on conflict do nothing;
 
   -- 7. Insert some attendance records for today
-  for emp_record in (select id from public.employees where organization_id = new_org_id and id != new_emp_id) loop
-    insert into public.attendance(organization_id, employee_id, date, status, check_in, check_out, working_hours, remarks)
-    values (
-      new_org_id,
-      emp_record.id,
-      current_date,
-      'present',
-      current_date + time '09:00:00',
-      current_date + time '17:30:00',
-      8.50,
-      'Standard shift'
-    )
-    on conflict (employee_id, date) do nothing;
-  end loop;
+  insert into public.attendance(organization_id, employee_id, date, status, check_in, check_out, working_hours, remarks)
+  select new_org_id, id, current_date, 'present', current_date + time '09:00:00', current_date + time '17:30:00', 8.50, 'Standard shift'
+  from public.employees
+  where organization_id = new_org_id and id != new_emp_id
+  on conflict (employee_id, date) do nothing;
 
   -- 8. Add some audit logs
   insert into public.audit_logs(organization_id, user_id, action, entity, entity_id, changes)
